@@ -1,5 +1,7 @@
 {
   "name": "master",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }

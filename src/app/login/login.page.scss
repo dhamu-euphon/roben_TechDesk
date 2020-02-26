@@ -1,0 +1,44 @@
+
+.login-wrapper {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-wrapper > * {
+    width: 100%;
+}
+
+.heading {
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid #222428;
+    width: 100%;
+    padding: 10px;
+}
+
+.logo {
+    width: 199px;
+}
+
+.invalid {
+    border-bottom-color: #ea6153;
+}
+
+.error {
+    color: #ea6153;
+}
+
+
+  

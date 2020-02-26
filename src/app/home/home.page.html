@@ -1,20 +1,101 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
+<ion-header [translucent]="false">
+  <div class="app-header">
+    <div>
+      <h1>Dashboard</h1>
+      <small>{{username}}</small>
+    </div>
+    <div class="profile">
+      <ion-icon name="power" (click)="logoutAction()"></ion-icon>
+    </div>
+  </div>
+
+  <ion-grid>
+
+    <ion-row>
+      <ion-col>
+        <h2 class="sub-title">Tasks</h2>
+      </ion-col>
+      <ion-col>
+        <ion-datetime class="date-selector" displayFormat="DD MMMM YYYY" placeholder="dateStr" mode="ios"
+          (ionChange)="showPicker()" [(ngModel)]="dates"></ion-datetime>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <ion-segment (ionChange)="segmentChanged($event)" class="segment" color="medium" [(ngModel)]="simpleDate">
+          <ion-segment-button value="Yesterday">
+            <ion-label>Yesterday</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="Today" checked>
+            <ion-label>Today</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="Tomorrow">
+            <ion-label>Tomorrow</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="network-info">
+      <ion-col size="8">
+        <small class="sync">{{lastRefresh}}</small>
+      </ion-col>
+      <ion-col>
+        <small [ngClass]="network ? 'status online' : 'status offline'">
+          <ion-icon name="wifi"></ion-icon>
+          {{network ? 'Online' : 'Offline'}}
+        </small>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="false">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card class="no-card" color="primary" *ngIf="!schedules">
+    <ion-card-content>
+      <h3>No Schedules</h3>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="welcome-card" color="{{jobCheckStatus(schedule.jobNumber) ? 'success' : 'primary'}}"
+    *ngFor="let schedule of schedules">
+    <ion-card-header>
+      <ion-card-title>{{schedule.jobNumber}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{schedule.jobSummary}}</p>
+      <p class="mt10"><small>VESSEL</small> : {{schedule.vessel}}</p>
+      <p class="mt10"><small>PORT</small> : {{schedule.port}}</p>
+      <p class="mt10">
+        <ion-icon name="navigate"></ion-icon>
+        {{schedule.contactDetails}}
+      </p>
+    </ion-card-content>
+
+    <ion-row class="cardfooter" class="ion-align-items-end">
+      <ion-col>
+        <ion-button color="light" size="small" (click)="jobCheckAction(schedule)">
+          <ion-icon slot="start" name="{{jobCheckStatus(schedule.jobNumber) ? 'log-out' : 'log-in'}}"></ion-icon>
+          {{jobCheckStatus(schedule.jobNumber) ? 'check Out' : 'check In'}}
+        </ion-button>
+      </ion-col>
+    </ion-row>
+
+  </ion-card>
+
 </ion-content>
+
+<ion-footer>
+  <ion-button color="{{officeCheck ? 'success' : 'tertiary'}}" mode="ios" shape="round" strong="true"
+    expand="block" (click)="officeCheckAction()">
+    <ion-icon slot="start" name="{{officeCheck ? 'log-out' : 'log-in'}}"></ion-icon>
+    {{officeCheck ? 'Office check Out' : 'Office check In'}}
+  </ion-button>
+</ion-footer>

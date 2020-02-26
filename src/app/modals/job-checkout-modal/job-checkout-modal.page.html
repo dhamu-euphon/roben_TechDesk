@@ -1,0 +1,31 @@
+<ion-content>
+  <ion-list>
+    <ion-list-header>
+      Checkout
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>Status</ion-label>
+      <ion-select value="brown" okText="Okay" cancelText="Dismiss" [(ngModel)]="status">
+        <ion-select-option value="FC">Fully Completed</ion-select-option>
+        <ion-select-option value="PC">Partially Completed</ion-select-option>
+        <ion-select-option value="NF">Not Feasible</ion-select-option>
+        <ion-select-option value="WF">Work Failure</ion-select-option>
+        <ion-select-option value="SR">Spare Required</ion-select-option>
+        <ion-select-option value="TR">Item taken For Repair</ion-select-option>
+        <ion-select-option value="NA">Not Attended</ion-select-option>
+        <ion-select-option value="OT">Others</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-textarea placeholder="Enter comments" [(ngModel)]="comments" maxlength="2000"></ion-textarea>
+    </ion-item>
+
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-button color="primary" (click)="checkout()">Checkout</ion-button>
+  <ion-button color="medium" (click)="cancel()">Cancel</ion-button>
+</ion-footer>
