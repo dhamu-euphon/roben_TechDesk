@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AlertController, LoadingController, ModalController, ToastController } from '@ionic/angular';
 import { NavigationExtras, Router } from '@angular/router';
+import { Geolocation } from '@ionic-native/geolocation/ngx';
 import * as moment from 'moment';
 import { ActivityService, JobCheckinService, LoginService, ScheduleService } from '../services/services';
 import { JobCheckoutModalPage } from '../modals/job-checkout-modal/job-checkout-modal.page';
@@ -32,6 +33,7 @@ export class HomePage {
   constructor(
     private activityService: ActivityService,
     private alertController: AlertController,
+    private geolocation: Geolocation,
     private jobCheckinService: JobCheckinService,
     private loadingController: LoadingController,
     private router: Router,
@@ -56,6 +58,21 @@ export class HomePage {
     } else {
       this.officeCheck = false;
     }
+  }
+
+  ionViewDidEnter() {
+    if (!this.loginService.isAuthenticated()) {
+      this.router.navigateByUrl("/login");
+    }
+
+    this.geolocation.getCurrentPosition().then((resp) => {
+      this.gpsLatitude = resp.coords.latitude;
+      this.gpsLongitude = resp.coords.longitude;
+      this.networkLatitude = resp.coords.latitude;
+      this.networkLongitude = resp.coords.longitude;
+    }).catch((error) => {
+      console.log('Error getting location', error);
+    });
   }
 
   showPicker() {
@@ -131,14 +148,14 @@ export class HomePage {
   }
 
   officeCheckin() {
-    this.activityService.recordActivity(localStorage.getItem('user_id'), new Date(), "O", "I", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
+    this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).format('DD/MM/YYYY'), "O", "I", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
     localStorage.setItem('office_checkin', '1');
     this.officeCheck = true;
     this.ToastIt('success', 'Check-in to office successfully.');
   }
 
   officeCheckout() {
-    this.activityService.recordActivity(localStorage.getItem('user_id'), new Date(), "O", "O", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
+    this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).format('DD/MM/YYYY'), "O", "O", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
     localStorage.setItem('office_checkin', '0');
     this.officeCheck = false;
     this.ToastIt('success', 'Check-out of office successfully.');

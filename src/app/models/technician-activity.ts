@@ -1,6 +1,6 @@
 export interface TechnicianActivity {
     technicianId: string,
-    activityDate: Date,
+    activityDate: string,
     activityType: string,
     activityMode: string,
     source: string,

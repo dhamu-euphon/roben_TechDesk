@@ -48,11 +48,11 @@ export class ScheduleService {
               instructions: arr.instructions,
               priority: arr.priority,
               checkin: arr.checkin,
-              scheduleDate: arr.scheduleDate
+              scheduleDate: arr.scheduleDate,
+              scheduleId: arr.scheduleId
             }
             return scheduleList;
           });
-          //alert(list);
           return list;
         }
       ));
@@ -65,7 +65,7 @@ export class ScheduleService {
       let list = JSON.parse(storedOperations);
       let data = [];
       for (let i = 0; i < list.length; i++) {
-        if (parseInt(list[i].scheduleDate) === parseInt(moment(scheduleDate).format('DDMMYYYY'))) {
+        if (parseInt(list[i].scheduleId) === parseInt(moment(scheduleDate).format('DDMMYYYY'))) {
           data.push(list[i]);
         }
       }
@@ -76,7 +76,8 @@ export class ScheduleService {
   private insertSchedules(data, scheduleDate) {
     let list: ScheduleList[] = [];
     list = data.map(d => {
-      d.scheduleDate = moment(scheduleDate).format('DDMMYYYY');
+      d.scheduleDate = moment(scheduleDate).format('DD/MM/YYYY');
+      d.scheduleId = moment(scheduleDate).format('DDMMYYYY');
       return d;
     });
     if (data.length) {
@@ -85,7 +86,7 @@ export class ScheduleService {
         if (objs != null) {
           let temp = JSON.parse(objs);
           for (let i = 0; i < temp.length; i++) {
-            if (parseInt(temp[i].scheduleDate) !== parseInt(moment(scheduleDate).format('DDMMYYYY'))) {
+            if (parseInt(temp[i].scheduleId) !== parseInt(moment(scheduleDate).format('DDMMYYYY'))) {
               storedObj.push(temp[i]);
             }
           }

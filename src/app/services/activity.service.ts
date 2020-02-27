@@ -4,6 +4,7 @@ import { Storage } from '@ionic/storage';
 import { AppGlobals } from '../app.globals';
 import { TechnicianActivity } from '../models/technician-activity';
 import { BehaviorSubject, Observable, from, of, forkJoin } from 'rxjs';
+import * as moment from 'moment';
 import { Coordinate } from '../models/coordinate';
 
 const STORAGE_REQ_KEY = 'activities';
@@ -18,7 +19,7 @@ export class ActivityService {
     this.pushActivities();
   }
 
-  recordActivity(technicianId: string, activityDate: Date, activityType: string, activityMode: string, source: string, jobDetals: {}, gpsCoordinate: Coordinate, networkCoordinate: Coordinate) {
+  recordActivity(technicianId: string, activityDate: string, activityType: string, activityMode: string, source: string, jobDetals: {}, gpsCoordinate: Coordinate, networkCoordinate: Coordinate) {
 
     let activity: TechnicianActivity = {
       activityDate: activityDate,

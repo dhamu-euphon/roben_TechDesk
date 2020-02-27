@@ -8,5 +8,6 @@ export interface ScheduleList {
     instructions: string,
     priority: number,
     checkin: number,
-    scheduleDate: Date
+    scheduleDate: Date,
+    scheduleId: number
 }
