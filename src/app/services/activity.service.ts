@@ -20,7 +20,6 @@ export class ActivityService {
   }
 
   recordActivity(technicianId: string, activityDate: string, activityType: string, activityMode: string, source: string, jobDetals: {}, gpsCoordinate: Coordinate, networkCoordinate: Coordinate) {
-
     let activity: TechnicianActivity = {
       activityDate: activityDate,
       activityMode: activityMode,
@@ -60,7 +59,7 @@ export class ActivityService {
         ).then(data => {
           let response = JSON.parse(data.data);
           if (response.status == 0) {
-            this.storage.set(STORAGE_REQ_KEY, JSON.stringify({}));
+            this.storage.set(STORAGE_REQ_KEY, JSON.stringify([]));
           }
         }).catch(error => {
           console.log(JSON.stringify(error));

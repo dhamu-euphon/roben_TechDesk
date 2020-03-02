@@ -3,6 +3,7 @@ import { AlertController, LoadingController, ModalController, ToastController } 
 import { NavigationExtras, Router } from '@angular/router';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import * as moment from 'moment';
+import { HTTP } from '@ionic-native/http/ngx';
 import { ActivityService, JobCheckinService, LoginService, ScheduleService } from '../services/services';
 import { JobCheckoutModalPage } from '../modals/job-checkout-modal/job-checkout-modal.page';
 import { ScheduleList } from '../models/schedule-list';
@@ -34,6 +35,7 @@ export class HomePage {
     private activityService: ActivityService,
     private alertController: AlertController,
     private geolocation: Geolocation,
+    private http: HTTP,
     private jobCheckinService: JobCheckinService,
     private loadingController: LoadingController,
     private router: Router,
@@ -45,12 +47,19 @@ export class HomePage {
     if (!this.loginService.isAuthenticated()) {
       this.router.navigateByUrl("/login");
     }
+    this.tomorrow = this.addDays(this.today, 1);
+    this.yesterday = this.addDays(this.today, -1);
   }
 
-  ngOnInit() {
+  ionViewDidEnter() {
+    if (!this.loginService.isAuthenticated()) {
+      this.router.navigateByUrl("/login");
+    }
     this.scheduleService.getData(this.today, false).subscribe(data => {
       this.schedules = data;
       this.loadingController.dismiss();
+      let date = moment(localStorage.getItem("lastRefresh"));
+      this.lastRefresh = date.format("MMM D YYYY, h:mm:ss A");
     });
     let status = localStorage.getItem('office_checkin');
     if (parseInt(status) == 1) {
@@ -58,13 +67,6 @@ export class HomePage {
     } else {
       this.officeCheck = false;
     }
-  }
-
-  ionViewDidEnter() {
-    if (!this.loginService.isAuthenticated()) {
-      this.router.navigateByUrl("/login");
-    }
-
     this.geolocation.getCurrentPosition().then((resp) => {
       this.gpsLatitude = resp.coords.latitude;
       this.gpsLongitude = resp.coords.longitude;
@@ -73,6 +75,13 @@ export class HomePage {
     }).catch((error) => {
       console.log('Error getting location', error);
     });
+    this.http.get('http://gd.geobytes.com/GetCityDetails', {}, {})
+      .then(data => {
+        let cords = JSON.parse(data.data);
+        this.networkLatitude = parseFloat(cords.geobyteslatitude);
+        this.networkLongitude = parseFloat(cords.geobyteslongitude);
+      })
+      .catch(error => console.log("Error" + error));
   }
 
   showPicker() {
@@ -148,14 +157,14 @@ export class HomePage {
   }
 
   officeCheckin() {
-    this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).format('DD/MM/YYYY'), "O", "I", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
+    this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).toISOString(), "O", "I", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
     localStorage.setItem('office_checkin', '1');
     this.officeCheck = true;
     this.ToastIt('success', 'Check-in to office successfully.');
   }
 
   officeCheckout() {
-    this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).format('DD/MM/YYYY'), "O", "O", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
+    this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).toISOString(), "O", "O", "TD", null, this.getGpsCoordinate(), this.getNetworkCoordinate());
     localStorage.setItem('office_checkin', '0');
     this.officeCheck = false;
     this.ToastIt('success', 'Check-out of office successfully.');
@@ -214,7 +223,7 @@ export class HomePage {
       let jobDetails = {
         "jobNumber": schedule.jobNumber
       };
-      this.activityService.recordActivity(localStorage.getItem('user_id'), schedule.scheduleDate, "J", "I", "TD", jobDetails, this.getGpsCoordinate(), this.getNetworkCoordinate());
+      this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).toISOString(), "J", "I", "TD", jobDetails, this.getGpsCoordinate(), this.getNetworkCoordinate());
       this.showPicker();
       this.ToastIt('success', 'Check-in to job successfully.');
     }
@@ -229,10 +238,16 @@ export class HomePage {
   }
 
   doRefresh(event) {
-    this.scheduleService.getData(new Date(this.dates), true).subscribe(data => {
-      this.schedules = data;
+    if (navigator.onLine) {
+      this.scheduleService.getData(new Date(this.dates), true).subscribe(data => {
+        this.schedules = data;
+        let date = moment(localStorage.getItem("lastRefresh"));
+        this.lastRefresh = date.format("MMM D YYYY, h:mm:ss A");
+        event.target.complete();
+      });
+    } else {
       event.target.complete();
-    });
+    }
   }
 
   async presentLoading() {
@@ -273,7 +288,7 @@ export class HomePage {
           "latitude": this.networkLatitude,
           "longitude": this.networkLongitude
         };
-        this.activityService.recordActivity(localStorage.getItem('user_id'), scheduleDate, "J", "O", "TD", jobDetails, this.getGpsCoordinate(), this.getNetworkCoordinate());
+        this.activityService.recordActivity(localStorage.getItem('user_id'), moment(new Date()).toISOString(), "J", "O", "TD", jobDetails, this.getGpsCoordinate(), this.getNetworkCoordinate());
         this.jobCheckinService.checkout(jobNumber);
         this.showPicker();
         this.ToastIt('success', 'Check-out of job successfully.');
@@ -319,6 +334,10 @@ export class HomePage {
       ]
     });
     await alert.present();
+  }
+
+  addDays(theDate, days) {
+    return new Date(theDate.getTime() + days * 24 * 60 * 60 * 1000);
   }
 
 }

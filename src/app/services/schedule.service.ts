@@ -22,7 +22,7 @@ export class ScheduleService {
   }
 
   getData(scheduleDate: Date, forceRefresh: boolean = false): Observable<ScheduleList[]> {
-    if (!navigator.onLine) {
+    if (!navigator.onLine || !forceRefresh) {
       localStorage.setItem("lastRefresh", moment(new Date()).toISOString());
       return this.getSchedules(scheduleDate);
     } else {
